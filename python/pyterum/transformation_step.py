@@ -2,6 +2,7 @@ from typing import List
 
 from pyterum.socket_conn import SocketConn
 from pyterum.local_fragment_desc import LocalFragmentDesc
+from pyterum.kill_message import KillMessage
 from pyterum import env
 
 class TransformationStepInput(SocketConn):
@@ -15,8 +16,21 @@ class TransformationStepInput(SocketConn):
         self.produce = None
         self._consumer = super().consumer()
 
+    # Yields None if the message is the kill message, indicating that there will be no more messages
     def consumer(self) -> LocalFragmentDesc:
-        yield next(self._consumer)
+        while True:
+            msg = next(self._consumer)
+            try:
+                output = LocalFragmentDesc.from_json(msg)
+            except (KeyError, TypeError):
+                pass
+
+            try:
+                KillMessage.from_json(msg)
+            except (KeyError, TypeError):
+                pass
+
+            yield output
 
 
 class TransformationStepOutput(SocketConn):
@@ -30,4 +44,4 @@ class TransformationStepOutput(SocketConn):
         self.consumer = None
 
     def produce(self, data:LocalFragmentDesc):
-        super().produce(data)
+        super().produce(data.to_json())

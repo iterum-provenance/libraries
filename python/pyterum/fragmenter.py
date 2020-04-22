@@ -1,6 +1,7 @@
 from typing import List
 
 from pyterum.socket_conn import SocketConn
+from pyterum.kill_message import KillMessage
 from pyterum import env
 
 class FragmenterInput(SocketConn):
@@ -14,9 +15,17 @@ class FragmenterInput(SocketConn):
         self.produce = None
         self._consumer = super().consumer()
 
+    # Yields None if the message is the kill message, indicating that there will be no more messages
     def consumer(self) -> List[str]:
         while True:
-            yield next(self._consumer)
+            output = next(self._consumer)
+            try:
+                KillMessage.from_json(output)
+                output = None
+            except (KeyError, TypeError):
+                pass
+
+            yield output
 
 
 class FragmenterOutput(SocketConn):
@@ -31,3 +40,7 @@ class FragmenterOutput(SocketConn):
 
     def produce(self, data:List[str]):
         super().produce(data)
+
+    # To send that the fragmenter is done
+    def produce_done(self):
+        super().produce(KillMessage())

@@ -8,6 +8,9 @@ if __name__ == "__main__":
 
     for file_list in fragmenter_in.consumer():
         print(f"received: {file_list}", flush=True)
+        if file_list == None:
+            break
+
         for f in file_list:
             msg = [f]
             print(f"sending: {msg}", flush=True)

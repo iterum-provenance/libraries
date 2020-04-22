@@ -4,11 +4,15 @@ import os
 import sys
 
 from pyterum import transmit, env
+from pyterum.kill_message import KillMessage
+
 
 def sender(conn):
     i = 0
     while True:
-        # msg = {"files":[f"file_no{i}.txt"]}
+        if i > 5:
+            transmit.send_to(conn, KillMessage().to_json())
+            break
         msg = [f"file_no{x}.txt" for x in range(i)]
         print(f"server sending: '{msg}'")
         transmit.send_to(conn, msg)
