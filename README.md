@@ -8,6 +8,6 @@ Iterum allows for the creation of client libraries for different languages. Thes
 In this way, the transformation step does not has to concern itself with the communication with the framework, and can focus on the actual transformation step.
 
 
-### Current client library implementation
+### Current client library implementations
 
 * [Pyterum](https://github.com/iterum-provenance/pyterum), Python library
